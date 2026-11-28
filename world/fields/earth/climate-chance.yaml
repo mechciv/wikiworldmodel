@@ -1,0 +1,78 @@
+# A derived field: made by the build from the climate field's runs, the Earth's mean warmth and what was found that
+# tells of climate (model:earth/climate-conditioned, core/climatechance.ts), and written in files of its own, one for
+# each keyframe (climate-chance/). Nothing is drawn from it: the land is still painted from the run.
+id: field:earth/climate-chance
+type: field
+kind: raster
+title: How likely each climate was
+quantity: the chance of each class of climate, with the central warmest month, coldest month and aridity, and their spreads
+unit: shares from 0 to 1; °C; and the aridity as the Köppen–Geiger classes read it (core/climate.ts)
+description: >-
+  The climate of the land at each keyframe of the climate field, with how sure it is: at every node a central warmest
+  month, coldest month and aridity, a spread about each, and from them the chance of each of the eight classes the globe
+  paints the land by. It starts from the run of the keyframe. The Earth's mean warmth is made anew, from what an energy
+  balance makes of the Sun and the CO₂ of the time, the rocks' curve of the mean temperature, and the fossil forests of
+  the span, and the run's pattern is moved to it as the runs themselves answer to their means, more towards the poles
+  than at the equator. The run's own error at a place is what it is at the present, where the climate is measured, and
+  its mean error there is part of that spread and is taken off nowhere. Then what was found near: coals and salts,
+  reefs, tills and forests, each kind set against another so that how much a place was dug does not enter. A bed moves
+  the climate only by the part of what moves such beds that the run's error could explain, which for coals and salts is
+  under a half and for reefs and tills next to nothing. It is the climate of a moment taken anywhere in the
+  keyframe's span, some ten million years. The climate the globe paints, and everything that reads it, is still the
+  run's.
+frame: frame:earth/geographic
+grid: { kind: lonlat, res_deg: 2 }
+time: { lo: 540 Ma, hi: 0 Ma, step: 10 Myr }
+derived: true
+from: [field:earth/climate, field:earth/climate-beds, field:earth/co2, field:sun/luminosity, field:earth/surface-temperature, field:earth/temperature-energy-balance, field:earth/climate-late-quaternary]
+rule: climate-chance
+spread: ensemble
+uncertainty: >-
+  The chances are the uncertainty: a place at 0.7 for a class has that class in seven members of the world out of ten.
+  A member is four draws, the same at every place and time: of the Earth's mean warmth, which keeps the place its
+  member of the CO₂ has among the members; of the run's error in the year's mean; of its error in the season's swing;
+  and of its error in the aridity. One draw for the whole globe takes every place to err the same way, which is the
+  simplest thing that could be so. Held to the present, with each block's spread told from the other blocks, the
+  measured warmest month, coldest month and aridity lie in the band nine members in ten do at about nine land nodes in
+  ten. In the deep past the run's error is surely more than at the present, and the spread does not know it: where a
+  run's winters are known to be too cold, in the interiors of warm worlds, the band does not reach the fossils'
+  climate. Each build counts how the chances held (coverage.json, climateChance).
+interp: plate-warp
+moves_with: src:paleomap-plate-model
+params:
+  # How wide a belt of latitude the runs' answer to the Earth's mean warmth is read in, degrees.
+  belt_deg: 10
+  # How many standard deviations the half-width of the curve's band is read as.
+  curve_band_sd: 1
+  # How long a stretch of the curve is held out to score the energy balance, Myr.
+  era_myr: 100
+  # The least the energy balance's own error is taken to be, °C.
+  balance_sd_min: 1
+  # The chance that a fossil forest stood where the climate was not one that bears trees.
+  forest_slip: 0.05
+  # Where each kind of bed's share is counted from: an aridity of one (its log is 0), and a year's mean of 20 °C and
+  # of 0 °C.
+  wet_at: 0
+  reef_at: 20
+  ice_at: 0
+  # Where the fit starts: how fast the log of the odds of each kind moves with its quantity, and how much a place's
+  # own log odds vary about that, as a variance. The build fits them and writes what it fitted in
+  # climate-chance/index.json.
+  wet_slope: 1.5
+  reef_slope: 0.1
+  ice_slope: 0.3
+  own: 1
+  # How many keyframes either side share one level with a keyframe.
+  pool: 2
+  # How many beds of the rarer kind, by weight, a keyframe and those it shares a level with must have for the kind to
+  # be read there.
+  level_min: 5
+  # What it is scored beside and on: the width in latitude of the smoother's bell, the tiles and the blocks held out,
+  # in degrees, and every how many keyframes an era is held out.
+  smoother_deg: 10
+  tile_deg: 10
+  block_deg: 40
+  span_every: 4
+  # The distances the run's errors at the present are compared over, km: the bell's width is fitted to how alike they
+  # are within each.
+  reach_km: [300, 500, 750, 1000, 1500, 2000, 3000]

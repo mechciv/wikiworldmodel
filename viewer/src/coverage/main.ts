@@ -216,7 +216,7 @@ class Page {
     this.detail = el('aside', 'cov-detail');
     this.detail.setAttribute('aria-live', 'polite');
     main.append(this.chart, this.detail);
-    page.append(main, this.houses(), this.peopleScores(), this.seaScores(), this.table());
+    page.append(main, this.houses(), this.peopleScores(), this.seaScores(), this.climateScores(), this.table());
     app.append(page);
     this.tip = el('div', 'tip');
     this.tip.hidden = true;
@@ -1095,6 +1095,133 @@ class Page {
         ),
       );
     }
+    return box;
+  }
+
+  /**
+   * The climate of the deep past on what it did not see (docs/slices/TWENTY-FOURTH-SLICE.md;
+   * model:earth/climate-conditioned): the Earth's mean warmth beside the rocks' curve with an era held out; each kind of
+   * bed that tells of climate predicted with more and more of what lies round it held out, beside a smoother with no
+   * causes; the columns of rock and the fossil forests; and the present, where the climate is measured.
+   */
+  climateScores(): HTMLElement {
+    const box = el('section', 'cov-houses cov-climate');
+    const s = this.cov.climateChance;
+    if (!s) return box;
+    box.append(el('h2', undefined, 'The climate of the deep past, on what the model did not see'));
+    const r = s.rule;
+    const e = r.error;
+    const row = (label: string, cells: string[]) => {
+      const tr = el('tr');
+      tr.append(el('td', undefined, label), ...cells.map((c) => el('td', undefined, c)));
+      return tr;
+    };
+    const table = (head: string[], rows: HTMLElement[]) => {
+      const t = el('table');
+      const tr = el('tr');
+      tr.append(...head.map((h) => el('th', undefined, h)));
+      t.append(tr, ...rows);
+      const scroll = el('div', 'scroll');
+      scroll.append(t);
+      return scroll;
+    };
+    const lpd = (x: { lpd: number; n: number }) => (x.n ? x.lpd.toFixed(3) : '–');
+    box.append(
+      el(
+        'p',
+        'cov-lede',
+        `The climate that paints the land of the deep past is one run of a climate model for each ten million years. Here each run is given a spread and held to evidence, at ${s.keyframes} keyframes, and nothing drawn is changed. The Earth's mean warmth is made of an energy balance on the CO₂ and the Sun of the time, the rocks' curve, and the fossil forests; the run's pattern is moved to it as the runs themselves answer, ${r.response.warm[0].toFixed(1)} °C on the land of the equator and ${r.response.warm.at(-1)!.toFixed(1)} °C at the poles for each degree of the mean; the run's own error is what it is at the present, where the climate is measured: ${e.mean_sd.toFixed(1)} °C in the year's mean, ${e.swing_sd.toFixed(1)} °C in the season's swing and a factor of ${Math.exp(e.wet_sd).toFixed(1)} in the aridity, as root mean squares. Then the beds that tell of climate, each kind set against another: ${count(s.beds)} of them where their kind is read, each counted by the chance that it is of its keyframe's span.`,
+      ),
+    );
+    const b = s.balance;
+    box.append(
+      table(
+        ["The Earth's mean warmth, with an era of the rocks' curve held out", 'Root mean square from the curve, °C'],
+        [row('The energy balance on the CO₂ and the Sun, as it is', [b.balance.toFixed(2)]), row("The energy balance brought to the curve's level by the other eras", [b.shifted.toFixed(2)]), row('The mean of the other eras: no causes', [b.baseline.toFixed(2)])],
+      ),
+    );
+    const words: Record<string, string> = { wet: 'Coals and mires against salts and dunes', reef: 'Reefs against the other beds of the sea', ice: 'Tills against the other beds of the land' };
+    const rows: HTMLElement[] = [];
+    for (const pair of ['wet', 'reef', 'ice'] as const) {
+      const sc = s.scores[pair];
+      if (!sc) continue;
+      const l = r.links[pair];
+      const part = Math.min(1, (l.slope * l.slope * (pair === 'wet' ? e.wet_sd : e.mean_sd) ** 2) / l.own);
+      rows.push(
+        row(`${words[pair] ?? pair}: the model`, [lpd(sc.model.node), lpd(sc.model.tile), lpd(sc.model.block), lpd(sc.model.span), pct(part)]),
+        row('By latitude and time alone: no causes', [lpd(sc.smoother.node), lpd(sc.smoother.tile), lpd(sc.smoother.block), lpd(sc.smoother.span), '']),
+        row('The members alone, nothing found near', [lpd(sc.alone), lpd(sc.alone), lpd(sc.alone), '', '']),
+      );
+    }
+    box.append(table(['Mean log chance given to the kind a bed was', 'Its node held out', 'Its tile', 'Its block', 'Its era', "The climate's part of what moves such beds"], rows));
+    const wet = s.scores.wet?.model.tile.held;
+    if (wet) {
+      box.append(
+        table(['Of the wet and dry beds given this chance of being a wet one', ...wet.map((x) => pct(x.given))], [row('The share that were, their tile held out', wet.map((x) => (x.n ? pct(x.were) : '–'))), row('How many', wet.map((x) => count(Math.round(x.n))))]),
+      );
+    }
+    if (s.columns) {
+      const c = s.columns;
+      box.append(
+        table(
+          ['Against the columns of rock, which it does not read', 'By the run', 'By the model'],
+          [
+            row(`Of every pair of a unit with salt (${count(c.dry)}) and one with coal (${count(c.wet)}) at a keyframe, the salt on the drier ground`, [pct(c.ordered.run), pct(c.ordered.model)]),
+            row('Units with salt on ground whose central climate is arid', [pct(c.sides.run.dry), pct(c.sides.model.dry)]),
+            row('Units with coal on ground whose climate is not', [pct(c.sides.run.wet), pct(c.sides.model.wet)]),
+          ],
+        ),
+      );
+    }
+    if (s.forests?.length) {
+      const f = s.forests;
+      const mean = (of: (x: (typeof f)[number]) => number) => f.reduce((a, x) => a + of(x), 0) / f.length;
+      box.append(
+        table(
+          ['The fossil forests: a climate that bears trees', 'By the run\'s class', 'By the model, each forest held out', 'Once read'],
+          [row(`${f.length} forests fossilized where they grew`, [`${f.filter((x) => x.runTrees).length} of ${f.length}`, `${pct(mean((x) => x.trees))} on average`, `${pct(mean((x) => x.read))} on average`])],
+        ),
+      );
+    }
+    if (s.present) {
+      const p = s.present;
+      const dist = (i: number) => [`${p.rms.hot[i]} °C`, `${p.rms.cold[i]} °C`, String(p.rms.wet[i])];
+      box.append(
+        table(
+          ['Held to the present, where the climate is measured', 'Mean log chance given to the measured class', 'Likeliest class is the measured one', 'Warmest month, from the measured', 'Coldest month', 'Log of the aridity'],
+          [
+            row("The run's class, as a point", [p.lpd.point.toFixed(3), pct(p.same.run), ...dist(0)]),
+            row('The run with its spread', [p.lpd.spread.toFixed(3), pct(p.same.run), ...dist(0)]),
+            row("With the beds of the youngest keyframe's span read", [p.lpd.beds.toFixed(3), pct(p.same.beds), ...dist(1)]),
+            row('The model: with the warmth of that span too', [p.lpd.model.toFixed(3), pct(p.same.model), ...dist(2)]),
+          ],
+        ),
+      );
+      box.append(
+        el(
+          'p',
+          'cov-note',
+          `Over ${count(p.nodes)} land nodes of the run of the present, each by its area; the distances are root mean squares. With each block of the land's spread told from the other blocks, the measured warmest month lies in the band nine members in ten have at ${pct(p.within.hot)} of the land, the coldest at ${pct(p.within.cold)}, and the aridity at ${pct(p.within.aridity)}. The run's class as a point is given the chance it turns out to deserve, and the rest is shared among the other classes.`,
+        ),
+      );
+    }
+    if (s.through.length) {
+      const one = (x: { more: number; less: number; model: number; smoother: number }) => (x.more + x.less > 0 ? `${x.model.toFixed(3)} against ${x.smoother.toFixed(3)} (${count(x.more)} and ${count(x.less)})` : '–');
+      box.append(
+        table(
+          ['Through time, beds held out with their tile: the model against no causes', 'Wet beds and dry', 'Reefs', ...(s.columns ? ["The columns' pairs: the run, then the model"] : []), 'Evidence on'],
+          s.through.map((t) => row(`${t.olderMa}–${t.youngerMa} Ma`, [one(t.pairs.wet), one(t.pairs.reef), ...(s.columns ? [t.columns && t.columns.dry && t.columns.wet ? `${pct(t.columns.run)} → ${pct(t.columns.model)}` : '–'] : []), pct(t.reached)])),
+        ),
+      );
+    }
+    const g = s.globe;
+    box.append(
+      el(
+        'p',
+        'cov-note',
+        `The log is of the chance the model gave to the kind a bed turned out to be: 0 is sure and right, ${Math.log(0.5).toFixed(2)} a coin. A bed moves the climate only by the part of what moves such beds that the run's error could explain, the last column: for reefs and tills, next to nothing. Over all keyframes what was found has told a quarter or more of the square of a spread on ${pct(g.reached)} of the land, and there the climate is counted as evidence above; the likeliest class is not the run's on ${pct(g.changed)}, mostly because the Earth's mean warmth is not the level the run was tuned to. \`npm run world -- climate <lat> <lon> <time>\` gives a place.`,
+      ),
+    );
     return box;
   }
 

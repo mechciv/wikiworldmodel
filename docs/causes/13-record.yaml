@@ -50,8 +50,8 @@ nodes:
     what: "Isotopes, tree rings and chemistry that record warmth, rain and the sea's level."
     now: borrowed
     has: [field:earth/antarctic-temperature, field:earth/sea-level-stack]
-    note: "Read for CO₂, one curve of warmth, Antarctica's temperature and the sea's level. No proxy conditions a climate field."
-    best: "Observations of the climate fields: sea-surface isotopes for deep time, PAGES 2k (CC BY) for the last 2,000 years."
+    note: "Read for CO₂, one curve of warmth, Antarctica's temperature and the sea's level. Since the twenty-fourth slice the curve of warmth observes the Earth's mean warmth of each keyframe of the deep past (model:earth/climate-conditioned), with its band. No measure at a place conditions a climate field: the world holds none as a field, and the leaves' temperatures are sentences in records."
+    best: "Observations of the climate fields at their places: sea-surface isotopes for deep time, leaf temperatures as claims of a property the vocabulary does not have yet, PAGES 2k (CC BY) for the last 2,000 years."
     gap: large
   - id: ice-cores
     label: Ice cores

@@ -137,6 +137,23 @@ describe('resolve', () => {
     expect(resolve(w, 'climate', 0, 0, GA(4.35)).tier).toBe('generic');
   });
 
+  it('answers the climate as evidence where what was found near has narrowed a run, and only where a run covers the time in its span', () => {
+    // North of 30° beds that tell of climate lie near and have told a quarter of a spread's square; south of it, less.
+    const chance: ResolveWorld['climateChance'] = { span: [GA(0.09), GA(0.01)], at: (lat) => ({ rests: lat > 30 }) };
+    const world: ResolveWorld = { ...WORLD, climateChance: chance };
+    const north = resolve(world, 'climate', 60, 0, GA(0.05));
+    expect(north).toMatchObject({ tier: 'evidence', value: 'climate field' });
+    expect(north.why).toContain('that tell of climate lie near');
+    expect(resolve(world, 'climate', 10, 0, GA(0.05))).toMatchObject({ tier: 'model', value: 'climate field' });
+    // Outside the span the conditioned climate answers for, the run answers alone, though it covers the time.
+    expect(resolve(world, 'climate', 60, 0, GA(0.005)).tier).toBe('model');
+    expect(resolve(world, 'climate', 60, 0, GA(0.095)).tier).toBe('model');
+    // A place it cannot answer for is the run's.
+    expect(resolve({ ...WORLD, climateChance: { span: chance.span, at: () => undefined } }, 'climate', 60, 0, GA(0.05)).tier).toBe('model');
+    // Where no run covers the time, there is nothing for the beds to narrow.
+    expect(resolve({ ...world, climate: undefined, climateChance: { ...chance, span: [GA(3.5), GA(2.5)] } }, 'climate', 60, 0, GA(3)).tier).toBe('generic');
+  });
+
   it('counts the tiers each layer answers in', () => {
     const counts = tierCounts(WORLD, [[60, 0], [10, 0]], [GA(3), GA(0.05)]);
     for (const layer of LAYERS) expect(Object.values(counts[layer]).reduce((a, b) => a + b, 0)).toBe(4);

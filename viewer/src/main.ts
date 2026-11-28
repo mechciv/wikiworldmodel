@@ -8,6 +8,7 @@ import { WATER_REACH } from '../../world/generators/life/water.ts';
 import './style.css';
 import { CLIMATE_LABEL, climateClass, decodeNode, type ClimateClass, type ClimateHeader, type ClimateNode, type ClimateRule } from '../../core/climate.ts';
 import { byteChance, byteFinds, expit, memberLevel, nodeOf, restsOnFinds } from '../../core/coast.ts';
+import { band, chanceWords, monthSd, PAIRS, restsOnBeds } from '../../core/climatechance.ts';
 import { decodeTile, type TypedArray } from '../../core/container.ts';
 import { bytesPrint, printCheck, settlePrint, type Fingerprint, type PrintCheck } from '../../core/fingerprint.ts';
 import { decodeMargin, decodeThickness, iceFrame, iceKeysAt, iceScenario, sampleGrid, type IceHeader, type IceKeyframe, type IceScenario } from '../../core/ice.ts';
@@ -41,6 +42,7 @@ import { Camera, MAX_DIST, MIN_DIST } from './camera.ts';
 import { LifeAtlas, type ClimateData } from './city/lifeatlas.ts';
 import { Climates, type ClimateAt } from './climates.ts';
 import { Coast } from './coast.ts';
+import { ClimateChance } from './climatechance.ts';
 import { LifeScene } from './city/life.ts';
 import type { StructureBundle } from './city/structures.ts';
 import { surveyOffset } from '../../world/generators/life/survey.ts';
@@ -64,7 +66,7 @@ import { buildOf, DEFAULT_HOUR, fromSearch, HOURS, quantize, toSearch, type View
 import { TileManager, type LoadedTile } from './tiles.ts';
 import { FeedbackDialog } from './ui/feedback.ts';
 import { esc } from './ui/html.ts';
-import { InspectPanel, stepName, type BiomeHere, type IceHere, type LandscapeHere, type OrganismHere, type PlanetStateInfo, type RowInfo, type SeaHere, type TerrainInfo, type TerritoryHere } from './ui/inspect.ts';
+import { InspectPanel, stepName, type BiomeHere, type IceHere, type LandscapeHere, type OrganismHere, type PlanetStateInfo, type ClimateChanceHere, type RowInfo, type SeaHere, type TerrainInfo, type TerritoryHere } from './ui/inspect.ts';
 import { barWords, noticeWords, standingAt } from './ui/lifewords.ts';
 import { labelAt, Markers, timeFor, visibility } from './ui/markers.ts';
 import { PlanetPanel, valueAt } from './ui/planet.ts';
@@ -143,6 +145,12 @@ export interface WikiWorldModelHandle {
    * no model of it covers the time, and until its keyframe has come: asking fetches it.
    */
   seaAt(lat: number, lon: number): { ageMa: number; chance: number; marine: number; land: number; rests: boolean } | null;
+  /**
+   * The climate of the deep past with its spread at a place on the globe at the time shown, as a click there reads it:
+   * the keyframe read, the chance of each class in the build's order, the beds found near by pair, and whether the
+   * climate rests on them. Null where no model of it covers the time, and until its keyframe has come: asking fetches it.
+   */
+  climateChanceAt(lat: number, lon: number): { ageMa: number; chances: number[]; found: Record<string, [number, number]>; told: { warm: number; wet: number }; rests: boolean } | null;
   /** the tree of life as the panel has it: its rows, and how many fossil rows the group chosen lights up */
   tree(): { rows: ReturnType<TreePanel['shownRows']>; litRows: number; litMarkers: string[] } | null;
   /** what is drawn over the globe as rows of a dataset */
@@ -433,6 +441,11 @@ async function start(root: HTMLElement): Promise<void> {
   const coast = new Coast(build, field, () => {
     if (!globe.seaCubes && field.seaCubes) globe.seaCubes = [field.seaCubes[0].texture, field.seaCubes[1].texture];
     cubeKey = '';
+    dirty = true;
+  });
+  // The climate of the deep past with its spread (model:earth/climate-conditioned): a keyframe's file comes when a
+  // click on the land first asks what the climate there was. Nothing of it is drawn.
+  const chance = new ClimateChance(build, () => {
     dirty = true;
   });
   if (ts.files.climate) {
@@ -1247,6 +1260,19 @@ async function start(root: HTMLElement): Promise<void> {
               const [, , p0, p1] = field.sample(d);
               const sea = seaHere(d, [p0, p1]);
               return sea ? { chance: sea.chance, rests: sea.rests } : undefined;
+            },
+          }
+        : undefined,
+      // The climate conditioned on its evidence: at the time shown, once the keyframe nearest it has come.
+      climateChance: chance.index
+        ? {
+            span: chance.index.coverage,
+            at: (lat, lon, t) => {
+              if (t !== state.t) return undefined;
+              const d = unitVector(lat, lon);
+              const [, , p0, p1] = field.sample(d);
+              const here = chanceNodeHere(d, [p0, p1]);
+              return here ? { rests: restsOnBeds(Math.max(here.node.told.warm, here.node.told.wet)) } : undefined;
             },
           }
         : undefined,
@@ -2871,6 +2897,12 @@ async function start(root: HTMLElement): Promise<void> {
         if (key && stillHere()) showTerrainAt();
       });
     }
+    const chanceAge = chanceKeyframe();
+    if (chanceAge !== undefined && !chance.key(chanceAge)) {
+      void chance.load(chanceAge).then((key) => {
+        if (key && stillHere()) showTerrainAt();
+      });
+    }
     const showTerrainAt = () => inspect.showTerrain({
       mode: fi.mode,
       lat: hit.lat,
@@ -2893,6 +2925,7 @@ async function start(root: HTMLElement): Promise<void> {
       polity: polityHere(hit.lon, hit.lat),
       ice: iceHere(hit.point, plate),
       sea: seaHere(hit.point, [p0, p1]),
+      climateChance: climateChanceHere(hit.point, [p0, p1]),
       people: peopleDrawn ? people.here(hit.lon, hit.lat, state.t) : undefined,
       ...(lh ? { landscape: lh } : {}),
     });
@@ -2943,6 +2976,59 @@ async function start(root: HTMLElement): Promise<void> {
       strength: ix.rule.strength,
       yield: ref.yield,
       told: ref.told,
+      source: ix.sourceRecord,
+    };
+  }
+
+  /** The keyframe of the climate conditioned nearest the time shown, in Ma, where the climate drawn is the one it is made on. */
+  function chanceKeyframe(): number | undefined {
+    const ix = chance.index;
+    if (!ix || !frameClimate || !chance.covers(frameClimate.field) || state.t < ix.coverage[0] || state.t > ix.coverage[1]) return undefined;
+    return chance.nearest(toMa(state.t));
+  }
+
+  /**
+   * What the climate conditioned has at a point of the globe, at its keyframe nearest the time shown: the point is
+   * carried back on its plate to where it stood then, and the node nearest is read. `plates` are the plates the globe
+   * has there at its two keyframes, as it numbers them. Undefined until the keyframe's file has come.
+   */
+  function chanceNodeHere(point: V3, plates: [number, number]) {
+    const ageMa = chanceKeyframe();
+    if (ageMa === undefined || !chance.key(ageMa) || !frameField) return undefined;
+    const plate = build.frames.plateIndex[Math.round(plates[frameMix < 0.5 ? 0 : 1])] || 0;
+    const now = Math.max(toMa(state.t), frameField.keyframesMa[0]);
+    const q = plate ? mul(build.plates.total(plate, now), conj(build.plates.total(plate, ageMa))) : ([1, 0, 0, 0] as Quat);
+    const [lat, lon] = toLatLon(rotate(conj(q), point));
+    const node = chance.at(ageMa, lat, lon);
+    return node ? { ageMa, node } : undefined;
+  }
+
+  /** The same, for the terrain panel: the chance of each class, the bands, what was found near, and what the warmth was made of. */
+  function climateChanceHere(point: V3, plates: [number, number]): ClimateChanceHere | undefined {
+    const here = chanceNodeHere(point, plates);
+    const ix = chance.index;
+    if (!here || !ix) return undefined;
+    const { ageMa, node } = here;
+    const ref = ix.keyframes.find((k) => k.ageMa === ageMa)!;
+    const run = frameClimateMix !== null && climateRule ? field.sampleClimate(point, frameClimateMix) : null;
+    return {
+      title: ix.title,
+      beds: ix.beds.title,
+      ageMa,
+      olderMa: ref.olderMa,
+      youngerMa: ref.youngerMa,
+      classes: chanceWords(node.chances, ix.classes),
+      run: run && climateRule ? climateClass(decodeNode(run), climateRule) : undefined,
+      hot: band(node.central.hot, monthSd(node.spreads)),
+      cold: band(node.central.cold, monthSd(node.spreads)),
+      mean: band((node.central.hot + node.central.cold) / 2, node.spreads.warm),
+      aridity: node.central.aridity,
+      aridityTimes: Math.exp(1.6449 * node.spreads.wet),
+      warmth: ref.warmth,
+      found: PAIRS.map((pair) => ({ pair, n: node.found[pair], read: ref.pairs[pair].told })),
+      reachKm: { warm: Math.round(ix.rule.error.warm_km / Math.SQRT2), wet: Math.round(ix.rule.error.wet_km / Math.SQRT2) },
+      told: node.told,
+      rests: restsOnBeds(Math.max(node.told.warm, node.told.wet)),
       source: ix.sourceRecord,
     };
   }
@@ -3496,7 +3582,7 @@ async function start(root: HTMLElement): Promise<void> {
       ['tiles', tiles.busy], ['features', features.busy], ['frame', dirty || reducedResolution || interactiveMode || timePending], ['layers', !layersReady],
       ['polities', !politiesReady && !!politiesLoading], ['field layers', fieldLayers.some((fl) => fl.busy)], ['rivers', !!rivers?.busy],
       ['people', !!state.people && !people.file && !!ts.files.people], ['clouds', !cloudsReady], ['surface', !surfaceReady],
-      ['biome texture', !biomeTexReady], ['generic land', !genericReady], ['climate', !climateReady || climates.busy], ['ice', !iceReady], ['coast', state.evidence && coast.busy],
+      ['biome texture', !biomeTexReady], ['generic land', !genericReady], ['climate', !climateReady || climates.busy], ['ice', !iceReady], ['coast', state.evidence && coast.busy], ['climate chance', chance.busy],
       ['territory', !territoryReady], ['tree', !!treeLoading], ['cube', !cubeKey.startsWith(`${state.t}|`)],
       ['selection', !!state.sel && shownRecord !== state.sel], ['flight', !!travel || !!flight || !!seaLook], ['city', cityWanted()],
       // A view held still is averaged over a few frames, each a fraction of a pixel off the last: a test takes its frame
@@ -3556,6 +3642,18 @@ async function start(root: HTMLElement): Promise<void> {
       const [, , p0, p1] = field.sample(d);
       const sea = seaHere(d, [p0, p1]);
       return sea ? { ageMa: sea.ageMa, chance: sea.chance, marine: sea.marine, land: sea.land, rests: sea.rests } : null;
+    },
+    climateChanceAt: (lat, lon) => {
+      const ageMa = chanceKeyframe();
+      if (ageMa === undefined) return null;
+      if (!chance.key(ageMa)) {
+        void chance.load(ageMa);
+        return null;
+      }
+      const d = unitVector(lat, lon);
+      const [, , p0, p1] = field.sample(d);
+      const here = chanceNodeHere(d, [p0, p1]);
+      return here ? { ageMa: here.ageMa, chances: here.node.chances, found: here.node.found, told: here.node.told, rests: restsOnBeds(Math.max(here.node.told.warm, here.node.told.wet)) } : null;
     },
     iceAt: (lat, lon) => {
       if (!frameIce) return null;

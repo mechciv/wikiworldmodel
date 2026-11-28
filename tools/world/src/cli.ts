@@ -171,6 +171,31 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
     }
     console.log(coastText(found));
   },
+  /** The climate of the deep past with its spread at a place of today at a time, as the latest build has it; with no place, how its model held. */
+  async climate([lat, lon, ...when]) {
+    const { chanceIndexOf, chanceOfBuild, chanceScoresText, chanceText } = await import('./climateat.ts');
+    const { parsePoint } = await import('../../../core/time.ts');
+    const { BUILDS } = await import('./paths.ts');
+    const index = join(BUILDS, 'index.json');
+    if (!existsSync(index)) throw new Error('no world build: run `npm run build:world` first');
+    const build = join(BUILDS, JSON.parse(readFileSync(index, 'utf8')).latest);
+    if (lat === undefined) {
+      const ix = chanceIndexOf(build);
+      if (!ix) {
+        console.log("The build has no climate conditioned on its evidence: its rock record's snapshot was not fetched.");
+        return 1;
+      }
+      console.log(chanceScoresText(ix));
+      return;
+    }
+    if (lon === undefined || !when.length || [lat, lon].some((x) => !Number.isFinite(Number(x)))) throw new Error('usage: world climate [<lat> <lon> <time>], the place as it is today: world climate 47.55 -106.86 66.5 Ma');
+    const found = chanceOfBuild(build, Number(lat), Number(lon), parsePoint(when.join(' ') as import('../../../core/time.ts').TimePointInput).t);
+    if (!found) {
+      console.log('The build has no climate for that place and time: it has none at all, no plate carries the place there, or no run has land near.');
+      return 1;
+    }
+    console.log(chanceText(found));
+  },
   async rocks([lat, lon, ...when]) {
     if (lat === undefined || lon === undefined || !when.length) throw new Error('usage: world rocks <lat> <lon> <time>, the place as it is today: world rocks -4.04 -43.18 123.7 Ma');
     const { rocksOfBuild, rocksText } = await import('./rocksnear.ts');

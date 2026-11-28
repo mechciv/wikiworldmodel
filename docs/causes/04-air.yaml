@@ -45,12 +45,12 @@ nodes:
     label: The Earth's mean warmth
     kind: at-once
     what: "The average temperature of the surface."
-    now: rule
-    has: [model:earth/energy-balance, field:earth/temperature-energy-balance, field:earth/surface-temperature, field:earth/snowball-co2, field:earth/thaw-co2]
-    note: "A balance of energy by latitude, run for each member of the CO₂. It is 5 °C colder than the rocks' curve on average, with a correlation of 0.50. That curve is another's series."
-    best: "The same balance with methane and a geography, conditioned on the isotope record, with rival curves scored beside it."
+    now: scored
+    has: [model:earth/energy-balance, field:earth/temperature-energy-balance, field:earth/surface-temperature, field:earth/snowball-co2, field:earth/thaw-co2, model:earth/climate-conditioned]
+    note: "A balance of energy by latitude, run for each member of the CO₂. It is 5 °C colder than the rocks' curve on average, with a correlation of 0.50. Since the twenty-fourth slice the mean warmth of each ten million years of the Phanerozoic is that balance, brought to the curve's level, with the curve and the fossil forests of the span as what observe it. With a hundred million years of the curve held out the balance tells it to 5.9 °C as it is, worse than the mean of the other eras does (3.7), and to 3.4 once brought to their level. The level is so the curve's, which is another's reconstruction; a forest near the pole at the Permian's end moves it by a degree or two."
+    best: "The same balance with methane and a geography, so that its level is its own; conditioned on the isotope record, with rival curves scored beside it."
     gap: medium
-    seen: [proxies, others]
+    seen: [proxies, others, fossils]
   - id: ocean-flow
     label: Ocean currents
     kind: at-once
@@ -72,20 +72,20 @@ nodes:
     label: Warmth by month
     kind: at-once
     what: "The temperature of each place in each month."
-    now: borrowed
-    has: [field:earth/climate, field:earth/climate-late-quaternary]
-    note: "One run for each 10 Myr at 2°, and a debiased series for 120 kyr. Spread unknown, and no evidence conditions it. At the Hell Creek the coldest month is below freezing where fossil leaves say 12–20 °C for the year."
-    best: "An ensemble made by scaling each run's pattern across the CO₂ band, conditioned on isotopes and leaves. Krapp et al. 2021 (open) to 800 kyr, and PAGES 2k (CC BY) for the last 2,000 years."
+    now: scored
+    has: [field:earth/climate, field:earth/climate-late-quaternary, model:earth/climate-conditioned, field:earth/climate-chance, field:earth/climate-beds]
+    note: "What is drawn is one run for each 10 Myr at 2°, and a debiased series for 120 kyr. Beside the runs, since the twenty-fourth slice, a climate with its spread at each node and keyframe: the run's pattern moved to the Earth's mean warmth as the runs themselves answer, 0.9 °C on the land of the equator and 2.8 °C at the poles for each degree, with the run's own error as it is at the present, 2.5 °C in the year's mean and 2.2 °C in the season's swing. Held to the present by blocks, the measured warmest and coldest month lie in its nine-in-ten band at 90% and 91% of the land. Reefs and tills are read and tell next to nothing of the warmth that the latitude does not; the fossil forests are read as bounds. At the Hell Creek the model is colder than the run, whose year's mean is already inside the leaves' 12–20 °C: its band takes in the lower part of that range, and its winters freeze. Nothing drawn reads it."
+    best: "A pattern from causes of the world's own, in place of another's runs; leaves, crocodilians and palms as observations of the year's mean and the coldest month, where today the leaves are a sentence in a record; the run's error told from the deep past's evidence and not only the present's; then what is drawn switched to it. Krapp et al. 2021 (open) to 800 kyr, and PAGES 2k (CC BY) for the last 2,000 years."
     gap: large
-    seen: [proxies, pollen, fossils, others]
+    seen: [proxies, pollen, fossils, rocks, others]
   - id: rain-months
     label: Rain by month
     kind: at-once
     what: "The rain and snow of each place in each month."
-    now: borrowed
-    has: [field:earth/climate, field:earth/climate-late-quaternary]
-    note: "From the same runs. Nothing tests it but the rivers it makes."
-    best: "With the warmth's ensemble, conditioned on coals, salts and old lake levels."
+    now: scored
+    has: [field:earth/climate, field:earth/climate-late-quaternary, model:earth/climate-conditioned, field:earth/climate-chance, field:earth/climate-beds]
+    note: "What is drawn is from the same runs. Beside them, since the twenty-fourth slice, the aridity of each node and keyframe with its spread, a factor of two at the present, conditioned on the coals and mires and the salts and dunes of the fossil collections, the one kind set against the other. Such beds held out are told better than by latitude and time alone at every hold-out, by the most with a region held out (−0.446 against −0.497, as mean logs of the chance). The run's error could explain 45% of what moves such beds, so they narrow the band by a quarter at the most. Of the columns' units with salt, which the model does not read, half lie on ground it has not arid, as by the run. Only the year's aridity is conditioned: the months' rain is the run's."
+    best: "The columns' salts and coals as observations, which are many more than the fossil collections' and now only a check; old lake levels; the rain by month, so that a monsoon can be told from a wet year."
     gap: large
     seen: [rocks, pollen, proxies, others]
   - id: climate-height
@@ -149,7 +149,8 @@ edges:
   - { from: global-temp, to: ocean-flow, now: inside, how: "The contrast of warm and cold water drives the overturning." }
   - { from: global-temp, to: winds, now: inside, how: "The contrast between equator and pole drives the winds." }
   - { from: elevation, to: winds, now: inside, how: "Plateaus steer the westerlies and draw the monsoon." }
-  - { from: global-temp, to: temp-months, now: missing, how: "Scaling a run's pattern to the Earth's mean warmth would give members. Today each time has the one run." }
+  - { from: global-temp, to: temp-months, now: partial, by: model:earth/climate-conditioned, how: "A run's pattern is moved to the Earth's mean warmth as the runs themselves answer to their means, and gives members. What is drawn is still the one run." }
+  - { from: global-temp, to: rain-months, now: partial, by: model:earth/climate-conditioned, how: "The aridity moves with the mean warmth as the runs have it: the land of the middle latitudes a little drier in a warmer world." }
   - { from: co2, to: temp-months, now: inside, how: "Each run was made at one CO₂." }
   - { from: sun, to: temp-months, now: inside, how: "Each run was made under the Sun of its time." }
   - { from: orbit, to: temp-months, now: inside, how: "The orbit's cycles are inside the runs of the last 120 kyr, and held fixed in the deep past's." }

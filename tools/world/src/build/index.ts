@@ -62,6 +62,7 @@ import {
 import type { AtlasBin, AtlasIndex, SeaBin, SeaIndex } from '../../../../core/atlas.ts';
 import type { RocksBin, RocksIndex } from '../../../../core/rocks.ts';
 import { byteChance, byteFinds, nodeOf, restsOnFinds, type CoastIndex, type CoastKeyHeader } from '../../../../core/coast.ts';
+import { nodeOf as chanceNodeOf, restsOnBeds, type ChanceKeyHeader } from '../../../../core/climatechance.ts';
 import { fieldFor, fieldLods, loadBlocks, loadRelief, loadSnapshots, paleoElevation, sliceField, SRC_H, SRC_W, tileGrid, timeBins, type GridField } from './fields.ts';
 import { buildCities } from './city.ts';
 import { climateGrid, climateKeyframes, encodeClimate, forestChecks, heightOn, monthsFiles, monthsKeyframes, partClasses, partsFiles, waterParamsOf, type ClimateKeyframe, type PartRead, type WaterOptions } from './climate.ts';
@@ -84,6 +85,7 @@ import { buildAtlas, type RecentClimateSource, type RocksAgeData } from './atlas
 import { buildSeaAtlas, type SeaOut, type SeaParams } from './sea.ts';
 import { buildRocks, type NoneWords, type RocksOut, type RocksParams } from './rocks.ts';
 import { buildCoast, type CoastParams, type SpanRule } from './coast.ts';
+import { buildClimateChance, surfaceOfRuns, type ChanceParams, type ChanceRun } from './climatechance.ts';
 import { buildGround, groundResolve, type GroundBuilt } from './groundmaps.ts';
 import { buildStrata, columnAt, todayOf, type StrataOut, type StrataParams } from './strata.ts';
 import { strataColumns, type StrataColumns, type StrataFile, type StrataHeader } from '../../../../core/strata.ts';
@@ -97,7 +99,7 @@ import { worldThings } from '../things.ts';
 import { thingClaims, THINGS_INDEX } from '../../../../core/things.ts';
 import { planet as buildPlanet } from './planet.ts';
 import { series as buildSeries } from './series.ts';
-import { energyBalanceReport, RULES as ENERGY_BALANCE, seriesAt } from './energybalance.ts';
+import { energyBalanceParams, energyBalanceReport, RULES as ENERGY_BALANCE, seriesAt } from './energybalance.ts';
 import { territory as buildTerritory } from './territory.ts';
 import { tree as buildTree } from './tree.ts';
 import { DagRunner } from './dag.ts';
@@ -2119,6 +2121,152 @@ export async function runBuild(args: string[]): Promise<number> {
     };
   };
 
+  // Stage: climate-chance (the climate of the deep past with its spread, conditioned on its evidence; and the beds that
+  // tell of climate, found near each node)
+  const chanceField = world.fields.find((f) => f.rule === 'climate-chance');
+  const bedsField = world.fields.find((f) => f.rule === 'climate-beds');
+  let chanceMeta: { present: boolean; stats?: CoverageFile['climateChance']; keyframesMa?: number[] } = { present: false };
+  let chanceStageKey = '';
+  {
+    // The climate measured is the youngest keyframe of a climate the field names, one finer than the deep past's runs.
+    const measuredFrom = recentClimates.find((c) => chanceField?.from?.includes(c.field.id) && c.ages.includes(0));
+    const balance = energyBalanceParams(world);
+    const balanceRun = world.fields.find((f) => f.rule === ENERGY_BALANCE.temperature)?.params;
+    const pointsOf = (id: string) => seriesList.find((x) => x.id === id)?.points;
+    const sun = pointsOf('field:sun/luminosity');
+    const co2 = pointsOf('field:earth/co2');
+    const curve = pointsOf('field:earth/surface-temperature');
+    if (chanceField && bedsField && rockField && rockLand && climateField && biomeField && deepClimateMeta?.ages.length && measuredFrom && balance && sun && co2 && curve) {
+      const id = rockField.data!.from;
+      const path = datasetFile(id, world.manifest.datasets[id], rockField.data!.file);
+      if (existsSync(path)) {
+        const grid = climateGrid((climateField.grid as { res_deg: number }).res_deg);
+        const rule = biomeField.params as unknown as ClimateRule;
+        // The fossil forests, where each stood at the keyframe nearest its time.
+        const forests = forestChecks(solved, loadDeepClimateKeys(), grid, rule).map((f) => ({ id: f.id, ageMa: f.ageMa, keyframeMa: f.keyframeMa, lat: f.lat, lon: f.lon }));
+        const strataId = strataField?.data?.from;
+        const chanceStage = await dag.runStage(
+          'climate-chance',
+          {
+            field: fieldKey(chanceField),
+            beds: fieldKey(bedsField),
+            rocks: fieldKey(rockField),
+            fixes: fixesKey(claims.corrections(id)),
+            climate: fieldKey(climateField),
+            climateData: dsKey(climateField.data!.from),
+            biome: fieldKey(biomeField),
+            deepClimateStageKey,
+            measured: measuredFrom.stageKey,
+            paleoImport,
+            plateModel: dsKey(PLATE_MODEL),
+            plateIndexList,
+            strataStageKey,
+            series: sha256(stableStringify({ sun, co2, curve })),
+            balance,
+            balanceRun,
+            forests,
+          },
+          async (sink) => {
+            const spec = rockField.rows;
+            const given = JSON.parse(await readFile(path, 'utf8')) as RocksSnapshot;
+            const snap = spec ? correctRocks(given, spec, claims.corrections(id)) : given;
+            const surface = await surfaceOfRuns(world, climateField, grid);
+            const runs: ChanceRun[] = loadDeepClimateKeys().map((k) => {
+              const of = surface.get(k.ageMa);
+              if (!of) throw new Error(`climate-chance: ${climateField.id} has a keyframe of ${k.ageMa} Ma, and its file no run of that time`);
+              return { ageMa: k.ageMa, nodes: k.nodes, plate: k.plate, warm: of.warm, global: of.global };
+            });
+            const chunk = measuredFrom.chunks.find((c) => c.keyframesMa.includes(0))!;
+            const { header, arrays } = decodeTile<ClimateHeader>(toArrayBuffer(dag.readBlobBytesSync(chunk.file)));
+            const key0 = header.keyframes.find((k) => k.ageMa === 0)!;
+            const values = arrays[key0.values] as Uint8Array;
+            const landAt = arrays[key0.plate] as Uint16Array;
+            const g = header.grid;
+            const measured = (lat: number, lon: number) => {
+              const q = Math.round((g.lat0 - lat) / g.step) * g.nx + ((((Math.round((lon - g.lon0) / g.step) % g.nx) + g.nx) % g.nx));
+              return landAt[q] & LAND_BIT ? decodeNode([values[q * 4] / 255, values[q * 4 + 1] / 255, values[q * 4 + 2] / 255, values[q * 4 + 3] / 255]) : undefined;
+            };
+            // The columns of rock, which the climate does not read: where each stands today, and its units.
+            const strata = strataId ? getStrata() : undefined;
+            const points = strata ? (JSON.parse(await readFile(datasetFile(strataId!, world.manifest.datasets[strataId!], strataField!.data!.file), 'utf8')) as ColumnsSnapshot).columns.map((c): [number, number] => [c[4], c[5]]) : [];
+            if (strata && points.length !== strata.columns.columns.length) throw new Error(`climate-chance: ${points.length} columns in ${strataId}, and ${strata.columns.columns.length} in the build's strata`);
+            const built = buildClimateChance({
+              model: solved.model,
+              grid: { nx: grid.nx, ny: grid.ny, step: grid.step },
+              runs,
+              now: [...rockLand.snapshots].sort((a, b) => a.ageMa - b.ageMa)[0],
+              rocks: snap,
+              span: rockField.params as unknown as SpanRule,
+              series: { sun, co2, curve },
+              balance,
+              measured,
+              ...(strata ? { columns: { points, columns: strata.columns.columns } } : {}),
+              forests,
+              rule,
+              params: { ...(bedsField.params as object), ...(chanceField.params as object), members: Number(balanceRun?.members ?? 16), atmosphere_bar: Number(balanceRun?.atmosphere_bar ?? 1) } as ChanceParams,
+              about: {
+                field: chanceField.id,
+                title: chanceField.title,
+                description: chanceField.description,
+                beds: { field: bedsField.id, title: bedsField.title },
+                climate: climateField.id,
+                source: id,
+                sourceRecord: world.source.get(id) ? sourceRecord(world.source.get(id)!) : undefined,
+              },
+              log,
+            });
+            for (const [p, c] of built.files) await sink.put(p, c);
+            const ix = built.index;
+            const stats: CoverageFile['climateChance'] = {
+              field: ix.field,
+              beds: Math.round(ix.keyframes.reduce((n, k) => n + Object.values(k.pairs).reduce((m, x) => m + (x.told ? x.more + x.less : 0), 0), 0)),
+              keyframes: ix.keyframes.length,
+              rule: ix.rule,
+              warmth: ix.keyframes.map((k) => ({ ageMa: k.ageMa, warmth: k.warmth, pairs: k.pairs, reached: k.reached, changed: k.changed })),
+              balance: ix.warmth,
+              scores: ix.scores,
+              ...(ix.columns ? { columns: ix.columns } : {}),
+              ...(ix.forests ? { forests: ix.forests } : {}),
+              ...(ix.present ? { present: ix.present } : {}),
+              through: ix.through,
+              globe: ix.globe,
+            };
+            return { present: true, stats, keyframesMa: ix.keyframes.map((k) => k.ageMa) };
+          },
+          { codeFiles: ['tools/world/src/build/climatechance.ts', 'core/climatechance.ts', 'core/climate.ts', 'core/ebm.ts', 'core/samples.ts', 'tools/world/src/build/atlas.ts', 'tools/world/src/build/climate.ts', 'tools/world/src/netcdf.ts', 'tools/world/src/tables.ts', 'core/strata.ts', 'core/container.ts'] },
+        );
+        chanceMeta = chanceStage.meta;
+        chanceStageKey = chanceStage.key;
+      } else log(`climate-chance   not built: no snapshot ${id} yet`);
+    }
+  }
+  // The climate conditioned as resolve asks for it: the nearest keyframe's, read back from the build's files when first
+  // asked, at the place as given. It answers for the runs of the deep past, and not where a finer climate covers the time.
+  const chanceKeys = new Map<number, Uint8Array>();
+  const chanceResolve = (): ResolveWorld['climateChance'] => {
+    if (!chanceMeta.present || !chanceMeta.keyframesMa?.length || !climateField) return undefined;
+    const ages = chanceMeta.keyframesMa;
+    const finer = Math.max(...recentClimates.flatMap((c) => c.ages), -Infinity);
+    const span: [number, number] = [fromMa(Math.max(...ages)), fromMa(Number.isFinite(finer) ? finer : Math.min(...ages))];
+    const grid = climateGrid((climateField.grid as { res_deg: number }).res_deg);
+    return {
+      span,
+      at: (lat, lon, t) => {
+        const ageMa = toMa(t);
+        let age = ages[0];
+        for (const a of ages) if (Math.abs(a - ageMa) < Math.abs(age - ageMa)) age = a;
+        let told = chanceKeys.get(age);
+        if (!told) {
+          const { header, arrays } = decodeTile<ChanceKeyHeader>(toArrayBuffer(dag.readBlobBytesSync(`climate-chance/${age}.lwt`)));
+          told = arrays[header.told] as Uint8Array;
+          chanceKeys.set(age, told);
+        }
+        const n = chanceNodeOf(grid, lat, lon);
+        return { rests: restsOnBeds(Math.max(told[n * 2], told[n * 2 + 1]) / 255) };
+      },
+    };
+  };
+
   const groundOf = substrateRule
     ? (slice: number, positionAt: (ageMa: number) => { lat: number; lon: number }) => {
         const rocks = getRocks();
@@ -2420,6 +2568,7 @@ export async function runBuild(args: string[]): Promise<number> {
   if (rocksMeta.stats) coverageFile.rocks = rocksMeta.stats;
   if (strataMeta.stats) coverageFile.strata = strataMeta.stats;
   if (coastMeta.stats) coverageFile.coast = coastMeta.stats;
+  if (chanceMeta.stats) coverageFile.climateChance = chanceMeta.stats;
   if (atlasCoverage) coverageFile.forms = atlasCoverage;
 
   const genericLandGen = world.generators.find((g) => g.id === GENERIC_LAND);
@@ -2442,6 +2591,7 @@ export async function runBuild(args: string[]): Promise<number> {
       strataStageKey,
       substrateStageKey,
       coastStageKey,
+      chanceStageKey,
       atlasStageKey,
       seaStageKey,
       riversStageKey,
@@ -2487,6 +2637,7 @@ export async function runBuild(args: string[]): Promise<number> {
       );
       if (landscapeMeta?.present) resolveWorld.landscape = landscapeResolve(readLandscapeFromDag(dag));
       resolveWorld.coast = coastResolve();
+      resolveWorld.climateChance = chanceResolve();
       if (substrateRule) {
         const rocks = getRocks();
         const ground = getGround();
@@ -2535,6 +2686,7 @@ export async function runBuild(args: string[]): Promise<number> {
         sources.push({ layer: 'substrate', id: substrateField.id, title: substrateField.title, tier: 'model', span: rocksMeta.stagesSpan, lane: 'substrate' });
       }
       if (resolveWorld.coast && coastField) sources.push({ layer: 'geography', id: coastField.id, title: coastField.title, tier: 'evidence', span: resolveWorld.coast.span, res_deg: 1, lane: 'coast' });
+      if (resolveWorld.climateChance && chanceField) sources.push({ layer: 'climate', id: chanceField.id, title: chanceField.title, tier: 'evidence', span: resolveWorld.climateChance.span, res_deg: (chanceField.grid as { res_deg: number }).res_deg, lane: 'climate-chance' });
       if (reliefInfo && reliefGrid) {
         const held: [number, number] = [fromMa(reliefGrid.coverMa[0]), fromMa(reliefGrid.coverMa[1])];
         sources.push({ layer: 'geography', id: reliefInfo.field, title: `${reliefInfo.title}: the survey's cells, in a scene`, tier: 'model', span: held, res_deg: Math.round(reliefInfo.fine.step * 1e5) / 1e5, lane: 'relief-fine' });
@@ -2560,7 +2712,7 @@ export async function runBuild(args: string[]): Promise<number> {
       const land = landShares(resolveWorld, matrix.columns, COVERAGE.step, now);
       return { ...(balance ? { energyBalance: balance } : {}), ...(forests ? { forests } : {}), tiers, matrix, land };
     },
-    { codeFiles: ['core/resolve.ts', 'core/coverage.ts', 'core/glance.ts', 'core/coast.ts', 'tools/world/src/build/energybalance.ts', 'tools/world/src/build/climate.ts'] },
+    { codeFiles: ['core/resolve.ts', 'core/coverage.ts', 'core/glance.ts', 'core/coast.ts', 'core/climatechance.ts', 'tools/world/src/build/energybalance.ts', 'tools/world/src/build/climate.ts'] },
   );
   if (coverageAnalytics.meta.energyBalance) coverageFile.energyBalance = coverageAnalytics.meta.energyBalance;
   if (coverageAnalytics.meta.forests) coverageFile.forests = coverageAnalytics.meta.forests;
@@ -2613,6 +2765,7 @@ export async function runBuild(args: string[]): Promise<number> {
       ...(groundHeader ? { ground: 'ground.lwt' } : {}),
       ...(strataMeta.present ? { strata: 'strata.lwt' } : {}),
       ...(coastMeta.present ? { coast: 'coast/index.json' } : {}),
+      ...(chanceMeta.present ? { climateChance: 'climate-chance/index.json' } : {}),
       ...(landscapeMeta?.present ? { landscape: 'people/landscape.json' } : {}),
       ...(reliefInfo ? { relief: 'relief/index.json' } : {}),
       features: FEATURE_INDEX,

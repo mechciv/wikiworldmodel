@@ -335,6 +335,29 @@ export interface CoverageFile {
     /** how it does stretch by stretch of time, against the localities and the columns of rock */
     through: import('./coast.ts').CoastStretch[];
   };
+  /**
+   * the climate of the deep past conditioned on its evidence (model:earth/climate-conditioned): the rule as the build
+   * fitted it, the Earth's mean warmth at each keyframe, how the beds held out were told beside a smoother with no
+   * causes, how it agrees with the columns of rock and the fossil forests, how it holds at the present, where the
+   * climate is measured, and how much of the land it reaches
+   */
+  climateChance?: {
+    field: string;
+    /** the beds it read, by weight, over how many keyframes */
+    beds: number;
+    keyframes: number;
+    rule: import('./climatechance.ts').ChanceRule;
+    /** each keyframe's mean warmth, with the beds of each pair and the shares of the land the beds reach and change */
+    warmth: { ageMa: number; warmth: import('./climatechance.ts').Warmth; pairs: import('./climatechance.ts').ChanceKeyframe['pairs']; reached: number; changed: number }[];
+    /** the energy balance against the rocks' curve, with an era held out */
+    balance: import('./climatechance.ts').ChanceIndex['warmth'];
+    scores: import('./climatechance.ts').ChanceIndex['scores'];
+    columns?: import('./climatechance.ts').ColumnsCheck;
+    forests?: import('./climatechance.ts').ForestCheck[];
+    present?: import('./climatechance.ts').PresentCheck;
+    through: import('./climatechance.ts').ChanceStretch[];
+    globe: import('./climatechance.ts').ChanceIndex['globe'];
+  };
   /** fossil forests against the climate reconstructed for their place and time; none should be in a desert */
   forests?: { id: string; ageMa: number; keyframeMa: number; lat: number; lon: number; climate: string | null; label: string }[];
   /** which tier answers each layer, over a grid of places at times through each span (core/resolve.ts) */

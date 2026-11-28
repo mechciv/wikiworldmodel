@@ -71,7 +71,12 @@ The design already puts models between the evidence and the generators (section 
   they contradict. But the climate they start from is one run of another's model for each time, its spread unknown, and
   where the world's evidence disagrees with it the run stands: at the Hell Creek the field has the coldest month below
   freezing where fossil leaves give a mean of the year of about 12–20 °C, and the scene follows the field
-  (`model:earth/biome-from-climate`, `disagrees`).
+  (`model:earth/biome-from-climate`, `disagrees`). Since the twenty-fourth slice a second climate stands beside the
+  run, with a spread and held to evidence (`model:earth/climate-conditioned`): the Earth's mean warmth from the
+  energy balance on the CO₂, the rocks' curve and the fossil forests, the run's pattern moved to it, the run's error
+  as measured at the present, and coals, salts, reefs and tills as observations. Held to the present, its
+  nine-in-ten bands hold the measured months at nine land nodes in ten. It moves nothing drawn, and at the Hell
+  Creek it is colder than the run, no nearer the leaves.
 - **The ground under them has no model at all.** The height of the land is another's hand-drawn maps at 1° every
   5 Myr, with no spread, and it is the top of the order of causes: the climate runs, the rivers and the fossils'
   places all stand on it. The world's own evidence contradicts it and corrects nothing: 36% of marine fossil
@@ -116,6 +121,7 @@ evidence into estimates everywhere.
 | 14 | A first count of what was found near, by kind (`field:earth/rock-finds`); the sea's chance sets finds against finds so that effort cancels, and reads no absence. | A model of effort, and of what survives. |
 | 15 | One kind of observation states its support: a locality's box of ground and span of years. | A density answered at every scale. |
 | 11, 13, 16 | — | All of them. |
+| 2, 3, 7, 12 to 16, for the climate | The [twenty-fourth slice](../slices/TWENTY-FOURTH-SLICE.md): a prior from causes for the Earth's mean warmth, the energy balance on the CO₂'s members and the Sun, with the rocks' curve observing it over each keyframe's span (13) and the fossil forests moving it through the pattern (16: evidence of a place fitting what every place reads); members that keep their place from the CO₂ on; beds of four kinds as observations, kind against kind (14), each with its support (15); the run's own error read where the truth is measured; scores by node, tile, block and era beside a smoother with no causes, and checks it does not read (12). ([climatechance.ts](../../core/climatechance.ts), `npm run world -- climate`.) | A prior from causes for the pattern: it is another's runs, moved. The balance's level is fitted to the curve. The run's error in the deep past. Anything that measures warmth at a place. Nothing drawn reads it. |
 
 ## The design: a graph of quantities
 
@@ -397,7 +403,7 @@ climate, every cause as an edge that says whether the world carries it, and a ra
 | The depth of the sea floor | the floor's age, sediment | at once | today's surveys | The same maps' schematic depths. |
 | Ice, sea level and the coast | the climate, the basins' room, the ice's weight on the crust | settling, and at once for the coast | isotopes, shorelines, marine and land beds | A stack every 1 kyr for 798 kyr over today's ground, the strongest part. Before it a curve that moves no coast. Ice for 80 kyr only, and no rebound. For the deep past, a chance of sea from the maps' coast and the fossil localities (`model:earth/sea-chance`), which reads no sea level and moves no coast. |
 | The fine shape of the ground | the height of the land, wearing down, the rock | settling | today's surveys | 1.8 km cells, 30 m only round Rome; invented before the Pliocene. |
-| The climate of each month: warmth and rain | the Sun, CO₂, where the land and its heights lay, the ice | at once | isotopes, fossil leaves, pollen, coals and salts | One run for each time (Li et al. 2022 for the Phanerozoic, Beyer et al. 2020 for the last 120,000 years), spread unknown. No evidence conditions it. The energy balance is made of causes and held to evidence, but knows only latitude. |
+| The climate of each month: warmth and rain | the Sun, CO₂, where the land and its heights lay, the ice | at once | isotopes, fossil leaves, pollen, coals and salts | One run for each time (Li et al. 2022 for the Phanerozoic, Beyer et al. 2020 for the last 120,000 years), spread unknown, is what is drawn. Beside the deep past's runs, a climate with its spread at each node and keyframe (`model:earth/climate-conditioned`): the Earth's mean warmth from the energy balance, the rocks' curve and the fossil forests, the run's pattern moved to it, and the beds as observations; scored, and read by nothing drawn. The energy balance is made of causes and held to evidence, but knows only latitude. |
 | Water: runoff, rivers, lakes | the climate, the relief | at once | rivers seen today, old shorelines and channels | `model:earth/water-balance` and `model:earth/drainage`, from causes. |
 | What grew: the vegetation's growth and cover | the climate, CO₂, which plants there yet were | at once, settling behind a changing climate | pollen, plant fossils, coals | The climate's class read through thresholds; a vegetation model's growth for the last 120,000 years (`field:earth/net-primary-production`). No pollen. |
 | Who lived where: each taxon's range | its climate, the way overland and by sea, when it arose and ended | spreading | fossils and today's sightings, each over its effort | `model:life/atlas`: tiers by distance and like climate. No effort. |
@@ -529,7 +535,9 @@ On the Earth's track the ground comes first, then the climate, then life. Three 
 
 After them: sea-level cycles before 798 ka and ice for every cycle, indexed to the last one's; relief at 30 m for
 scenes of the human past; rival plate models as alternatives; and the climate as an ensemble conditioned on its
-proxies.
+proxies. The last is begun, as the [twenty-fourth slice](../slices/TWENTY-FOURTH-SLICE.md), for the deep past's runs
+and the evidence the world already held: it has no measure of warmth at a place to condition on yet, and nothing
+drawn reads it. What comes after it, era by era, is [CLIMATE.md](CLIMATE.md).
 
 ### The people of the land, from causes
 
