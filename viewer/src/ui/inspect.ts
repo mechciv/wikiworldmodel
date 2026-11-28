@@ -3,7 +3,8 @@ import { inspectFootprint } from './footprint.ts';
 // The inspect panel: what something is, when and where, every claim with its sources and
 // locators, the competing claims (which can be picked), its relations and the ones other
 // records make to it, and what the derived dates rest on.
-import type { ClimateClass } from '../../../core/climate.ts';
+import { CLIMATE_LABEL, type ClimateClass } from '../../../core/climate.ts';
+import { PAIR_WORDS, RESTS_FROM, type Pair, type Warmth } from '../../../core/climatechance.ts';
 import { chanceWords } from '../../../core/coast.ts';
 import type { Cover } from '../../../core/planet.ts';
 import type { LivingTaxon, SceneSpec } from '../../../core/scene.ts';
@@ -148,6 +149,8 @@ export interface TerrainInfo {
   ice?: IceHere;
   /** how likely the sea was here, by the fossil localities of the time, where a model of it covers the time */
   sea?: SeaHere;
+  /** the climate of the deep past here with its spread, where a model of it covers the time: the chance of each class, and what was found near */
+  climateChance?: ClimateChanceHere;
   /** how people lived here, as the human landscape has it at this time */
   landscape?: LandscapeHere;
 }
@@ -166,6 +169,43 @@ export interface LandscapeHere {
   whose?: string;
   kin?: string;
   tradition?: { id: string; label: string; dwelling: string };
+}
+
+/**
+ * The climate of the deep past with its spread where a click fell, at its keyframe nearest the time shown
+ * (model:earth/climate-conditioned, core/climatechance.ts): the chance of each class, the bands of the warmest and the
+ * coldest month, and the beds that tell of climate found near.
+ */
+export interface ClimateChanceHere {
+  /** the field's title, and the title of the field of what was found */
+  title: string;
+  beds: string;
+  /** the keyframe read, and the span its beds are of, in Ma */
+  ageMa: number;
+  olderMa: number;
+  youngerMa: number;
+  /** the classes a member in twenty or more has, likeliest first */
+  classes: { cls: ClimateClass; chance: number }[];
+  /** the class the run drawn has here */
+  run?: ClimateClass;
+  /** the bands nine members in ten lie in, °C: the warmest month, the coldest, and the year's mean */
+  hot: [number, number];
+  cold: [number, number];
+  mean: [number, number];
+  /** the central aridity, and how many times more or less nine members in ten have */
+  aridity: number;
+  aridityTimes: number;
+  /** the Earth's mean warmth at the keyframe, and what it was made of */
+  warmth: Warmth;
+  /** the beds found near, pair by pair: the two kinds each counted by how near it lies, and whether the pair is read at this keyframe */
+  found: { pair: Pair; n: [number, number]; read: boolean }[];
+  /** how far off a bed is still counted, in km: for the warmth and for the aridity */
+  reachKm: { warm: number; wet: number };
+  /** how much of the square of the spread what was found took away, of the warmth and of the aridity; and whether the climate here rests on it */
+  told: { warm: number; wet: number };
+  rests: boolean;
+  /** the dataset the beds are read from */
+  source?: SourceRecord;
 }
 
 /**
@@ -864,6 +904,7 @@ export class InspectPanel {
       ${info.sea ? this.seaSection(info.sea, info.elevation < 0) : ''}
       ${info.polity && info.elevation >= 0 ? this.politySection(info.polity) : ''}
       ${info.biome && info.elevation >= 0 && !underIce ? this.biomeSection(info.biome) : ''}
+      ${info.climateChance && info.elevation >= 0 && !underIce ? this.climateChanceSection(info.climateChance) : ''}
       <p class="method">${info.seaLevel ? this.seaLevelMethod(info.seaLevel, info.coastline) : `Interpolated between ${esc(blend)}, each moved with its plates to this time. The ${esc((info.coastline ?? 'coastline').toLowerCase())} is derived, not stored: the ${esc(info.datum === 'contemporaneous-sea-level' ? '0 m' : 'sea-level')} isoline of this field.`}${info.fieldSpread ? ` ${esc(SPREAD_TEXT[info.fieldSpread])}` : ''}</p></section>${this.stateSection(info.state)}${source}`,
       underIce ? info.ice!.title : info.fieldTitle,
     );
@@ -980,6 +1021,46 @@ export class InspectPanel {
     return `<div class="biome"><h3>Covered with</h3><p class="big">${esc(coverWords(b))}</p>
       <p>The climate here is ${esc(b.label.toLowerCase())}, in ${esc(b.title)}.${by ? ` So far: ${by}.` : ' No transition has happened yet.'}${b.next ? ` Not yet: ${this.link(b.next.id, b.next.label)}.` : ''}</p>
       <p class="method">${esc(b.rule)}${b.ruleSource ? ` The climate is from ${esc(short(b.ruleSource, b.ruleSource.id))}.` : ''} The pattern within it is generated: <span class="badge basis-procedural">procedural</span></p></div>`;
+  }
+
+  /**
+   * How likely each climate was here: the chance of each class, the bands of the months, what was found near that
+   * tells of climate, and what the Earth's mean warmth of the time was made of.
+   */
+  private climateChanceSection(c: ClimateChanceHere): string {
+    const count = (n: number) => (n < 0.05 ? 'none' : n < 10 ? n.toFixed(1) : String(Math.round(n)));
+    const when = (ageMa: number) => formatTime(fromMa(ageMa));
+    const deg = (x: number) => String(Math.round(x)).replace('-', '−');
+    const pct = (x: number) => `${Math.round(x * 100)}%`;
+    /** how much narrower a band is once this share of the square of its spread is taken away */
+    const narrowed = (told: number) => pct(1 - Math.sqrt(Math.max(0, 1 - told)));
+    const km = (x: number) => (Math.round(x / 100) * 100).toLocaleString('en-US');
+    const basis = c.rests ? 'evidence' : 'reconstruction';
+    const [top, ...rest] = c.classes;
+    const label = (cls: ClimateClass) => CLIMATE_LABEL[cls];
+    const others = rest.length ? `Else: ${rest.map((x) => `${label(x.cls)}, ${pct(x.chance)}`).join('; ')}.` : 'No other class has one chance in twenty.';
+    const run = c.run ? (c.run === top.cls ? ' The run that is drawn has the same.' : ` The run that is drawn has ${label(c.run)}.`) : '';
+    const read = c.found.filter((f) => f.read);
+    const any = read.some((f) => f.n[0] >= 0.05 || f.n[1] >= 0.05);
+    const found = !read.length
+      ? `No kind of bed that tells of climate is read at this keyframe: the database has too few of them from ${when(c.olderMa)} to ${when(c.youngerMa)}.`
+      : any
+        ? `Beds of ${when(c.olderMa)} to ${when(c.youngerMa)} near where this ground stood, each counted by how near it lies: ${read.map((f) => `${PAIR_WORDS[f.pair].more} ${count(f.n[0])}, ${PAIR_WORDS[f.pair].less} ${count(f.n[1])}`).join('; ')}.`
+        : `No bed that tells of climate was found near where this ground stood, of ${when(c.olderMa)} to ${when(c.youngerMa)}: the climate is the run's, moved to the Earth's mean warmth of the time.`;
+    const told = !any
+      ? ''
+      : c.rests
+        ? ` What was found has narrowed the band of the warmth here by ${narrowed(c.told.warm)} and of the aridity by ${narrowed(c.told.wet)}.`
+        : ` What was found has narrowed the band of the warmth here by ${narrowed(c.told.warm)} and of the aridity by ${narrowed(c.told.wet)}: less than the ${narrowed(RESTS_FROM)} at which the climate is said to rest on it.`;
+    const w = c.warmth;
+    const one = (x: { mean: number; sd: number }) => `${x.mean.toFixed(1)} ± ${x.sd.toFixed(1)} °C`;
+    const made = [w.prior ? `an energy balance on the CO₂ and the Sun of the time, brought to the curve's level, ${one(w.prior)}` : 'no CO₂ for an energy balance to read', w.seen ? `the rocks' curve, ${one(w.seen)}` : '', w.forests ? `${w.forests.n === 1 ? 'a fossil forest' : `${w.forests.n} fossil forests`} of the span, which moved it from ${one(w.forests)}` : ''].filter(Boolean).join('; ');
+    const src = c.source;
+    return `<div class="climate-chance"><h3>How likely each climate was <span class="badge basis-${basis}">${basis}</span></h3>
+      <p class="big">${pct(top.chance)} <span class="muted">${esc(label(top.cls))}</span></p>
+      <p>${esc(others)}${esc(run)} Nine members of the world in ten have the warmest month between ${deg(c.hot[0])} and ${deg(c.hot[1])} °C here, the coldest between ${deg(c.cold[0])} and ${deg(c.cold[1])} °C, and the year's mean between ${deg(c.mean[0])} and ${deg(c.mean[1])} °C; the aridity is ${c.aridity.toFixed(2)}, give or take ${c.aridityTimes.toFixed(1)} times, where under 1 is dry.</p>
+      <p>${esc(found)}${esc(told)}</p>
+      <p class="method">${esc(c.title)}, at its keyframe of ${esc(when(c.ageMa))}. The Earth's mean warmth then, ${one(w)}, is made of ${esc(made)}. The run's own global mean is ${w.run.toFixed(1)} °C, and its pattern is moved to the other as the runs themselves answer, more towards the poles. Its error at a place is taken to be what it is at the present, where the climate is measured. Then the beds, each kind set against another, out to about ${km(c.reachKm.wet * 3)} km for the aridity and ${km(c.reachKm.warm * 3)} km for the warmth. Nothing is made of what was not found. The land is still painted from the run.${src ? ` The beds are from ${esc(short(src, src.id))}.` : ''}</p></div>`;
   }
 
   /** The globe where no field covers the time shown: what is not known, and why; and the planet's state, if it has one. */

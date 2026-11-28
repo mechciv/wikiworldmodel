@@ -1,0 +1,48 @@
+# A derived field: counted by the build from the rock record's collections (model:earth/climate-conditioned,
+# core/climatechance.ts), and written with the climate it is read for, one file for each keyframe (climate-chance/).
+id: field:earth/climate-beds
+type: field
+kind: raster
+title: Beds that tell of climate, found near
+quantity: the beds of each kind found near a place, in three pairs
+unit: beds, each counted by how near it lies
+description: >-
+  What was found near each node of the climate field at each of its keyframes that says something of climate, in three
+  pairs. Coals and mires, which form where it is wet, against salts and dunes, which form where it is dry. Reefs, of warm
+  shallow seas, against the other beds of the sea. And tills, which ice leaves, against the other beds of the land. A
+  bed is every collection of the Paleobiology Database of one kind in one small box of ground, counted once, by the
+  chance that one of them at least is of the keyframe's span; it stands where its plate stood at the keyframe, and
+  counts whole at its own place and less with distance. Which of the database's words is which kind is in this
+  field's parameters: its lithologies, their adjectives, its environments and its classes of environment. The database
+  holds beds with fossils in them, so a salt, which seldom has any, is far rarer here than in the ground, and the only
+  tills are of the last few million years. It is a count of what has been collected and entered: where it is nothing,
+  nothing was found, which does not say that nothing was there.
+frame: frame:earth/geographic
+grid: { kind: lonlat, res_deg: 2 }
+time: { lo: 540 Ma, hi: 0 Ma, step: 10 Myr }
+derived: true
+from: [field:earth/rock-record, field:earth/climate]
+rule: climate-beds
+spread: unknown
+uncertainty: >-
+  A count, with no error of its own. A collection's place may be out by tens of km, its plate's place at the keyframe
+  by more the further back, and its age is an interval's: it is of each keyframe its interval overlaps, by the share
+  that lies inside.
+interp: plate-warp
+moves_with: src:paleomap-plate-model
+params:
+  # Collections of one kind within a box this many degrees across are one bed.
+  box_deg: 0.1
+  # Which of the database's words are read as a wet bed: a collection whose first or second lithology is one of
+  # these, or whose environment is.
+  wet_lithologies: [coal, peat, lignite, anthracite, subbituminous coal, bituminous coal, coal ball]
+  wet_environments: [mire/swamp]
+  # And as a dry bed: a lithology, an adjective of one, or an environment.
+  dry_lithologies: [evaporite, gypsum]
+  dry_adjectives: [gypsiferous]
+  dry_environments: [eolian indet., dune, interdune]
+  # The database's classes of environment read as a reef and as the sea, and as ice and as the land.
+  reef_class: reef
+  sea_class: marine
+  ice_class: glacial
+  land_class: terrestrial

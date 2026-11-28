@@ -45,6 +45,12 @@ export interface ResolveWorld {
    */
   coast?: { span: [number, number]; at: (lat: number, lon: number, t: number) => { chance: number; rests: boolean } | undefined };
   climate?: [number, number];
+  /**
+   * The climate of the deep past conditioned on its evidence (core/climatechance.ts, model:earth/climate-conditioned):
+   * the span it answers the runs of the deep past for, and at a place and time whether what was found near, beds and
+   * forests that tell of climate, has told a quarter or more of the square of the spread of its warmth or its aridity.
+   */
+  climateChance?: { span: [number, number]; at: (lat: number, lon: number, t: number) => { rests: boolean } | undefined };
   /** the energy-balance model (model:earth/energy-balance): the span it covers, and the CO₂ below which it freezes over */
   climateModel?: { span: [number, number]; freezeBelow?: (t: number) => number | null };
   ice?: [number, number];
@@ -97,7 +103,12 @@ export function resolve(w: ResolveWorld, layer: LayerId, lat: number, lon: numbe
       return a('generic', land ? 'land' : 'sea', 'Nothing records where the land was at this time: generic land is drawn, its places invented and its amount a placeholder.');
     }
     case 'climate': {
-      if (within(w.climate, t)) return a('model', 'climate field', 'A climate model\'s run covers this time.');
+      if (within(w.climate, t)) {
+        if (within(w.climateChance?.span, t) && w.climateChance!.at(lat, lon, t)?.rests) {
+          return a('evidence', 'climate field', 'Beds or forests of the time that tell of climate lie near, coals and salts, reefs, tills, trees fossilized where they grew: they have narrowed what a climate model\'s run says of this place.');
+        }
+        return a('model', 'climate field', 'A climate model\'s run covers this time.');
+      }
       if (within(w.climateModel?.span, t)) {
         const below = w.climateModel?.freezeBelow?.(t);
         const at = typeof below === 'number' ? `, below ${Number(below.toPrecision(2))} bar of CO₂ under the Sun of this time` : '';

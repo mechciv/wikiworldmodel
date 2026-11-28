@@ -23,7 +23,7 @@ export default defineConfig({
   // behaviour, drawn the fast way; and the city's full-quality views, which take minutes each in
   // software. Locally, `npm run test:e2e` runs all three, and the frame-time budget, which skips where there is no GPU.
   projects: [
-    { name: 'globe', testMatch: /(golden|viewer|biomes|ice|tree|layers|features|coverage|foundations|phone|identity|conquest|things|coast)\.spec\.ts$/ },
+    { name: 'globe', testMatch: /(golden|viewer|biomes|ice|tree|layers|features|coverage|foundations|phone|identity|conquest|things|coast|climatechance)\.spec\.ts$/ },
     { name: 'city', testMatch: /(city|life|landscape)\.spec\.ts$/ },
     { name: 'city-views', testMatch: /city-views\.spec\.ts$/ },
     // The frame-time budget, on a GPU: by hand or nightly on a machine with one, never in software (frametime.spec.ts).

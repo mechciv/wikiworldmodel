@@ -741,9 +741,9 @@ uncertainty: { kind: none, note: "A line with no width." }
   references the validator checks. Copy [sea-chance.yaml](../world/models/earth/sea-chance.yaml):
   - `kind`: what it remembers, of the plan's four: `at-once`, `settling`, `spreading` or `contingent`;
   - `prior`: what it expects before any evidence, from each cause it `reads`, and in what `form`;
-  - `observes`: each kind of `evidence` it conditions on, with one observation's `support` (the ground and the span
-    it speaks for), its `error`, and its `effort` (how the evidence came to exist, and what the model makes of its
-    absence);
+  - `observes`: each kind of `evidence` it conditions on, a record or every claim of a property (`{ prop: … }`, as an
+    input is written), with one observation's `support` (the ground and the span it speaks for), its `error`, and
+    its `effort` (how the evidence came to exist, and what the model makes of its absence);
   - `holdout`: what is `held` out, the `baseline` with no causes that it must beat, the `rivals` it is set beside,
     and where its `scores` are written.
 - A number the build fits is a `choice` that says where the fit starts and where the build writes what it fitted. The

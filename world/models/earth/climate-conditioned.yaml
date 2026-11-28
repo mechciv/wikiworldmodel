@@ -1,0 +1,268 @@
+# A model run here (section 4.10 of the design), made as docs/plans/MODELS.md asks: a prior from its causes, the
+# evidence as what it observes, and scores on evidence held out. Its fitted numbers are in each build's
+# climate-chance/index.json, where the build writes them; this record says where they come from.
+id: model:earth/climate-conditioned
+type: model
+title: The climate of the deep past with its spread, from the runs, the CO₂ and the beds
+description: >-
+  A climate with its spread at every node of the climate field at each of its keyframes, in three steps. First the
+  Earth's mean warmth. Before any evidence it is what the energy balance makes of the Sun and the CO₂ of the time, once
+  for each member of the CO₂, brought to the level of the rocks' curve of the mean temperature, with the balance's own
+  error about it. The curve, another's reconstruction, observes it over the keyframe's span, with its band and with
+  how far it moves within the span. The fossil forests of the span observe it too: trees grew where they stand, and
+  a forest near a pole asks for a warm Earth. Each member keeps the place its CO₂ gave it among the members. Then the
+  pattern. A run is a pattern about its own mean, and across the 55 runs a degree of the Earth's mean warmth is less
+  than a degree on the land of the equator and nearly three at the poles, with the land of the middle latitudes a
+  little drier: a member's climate at a place is the run's there, moved by its own mean warmth so. The run's own error
+  at a place is read where it can be measured, at the present: how far its year's mean, its season's swing and the
+  log of its aridity lie from the measured climate, as a root mean square, and over what distance its errors go
+  together. Its mean error is in that spread and is taken off nowhere, since the run of the present was made with
+  today's vegetation and ice laid down and the others with neither. Last the beds, each kind set against another so
+  that how much a place was dug does not enter: coals and mires against salts and dunes, reefs against the other beds
+  of the sea, tills against the other beds of the land. The members expect a share of the one kind among the two from
+  the climate they give the place, by a link fitted over all time, with a level for each keyframe that takes the
+  members to be right on average; the beds near say how far the place's own share lies from that; and of that
+  distance the climate is given only its part, by how much the run's error could explain of what moves such shares at
+  all. Nothing is made of what was not found. The pattern and how it moves are another's model's: the world has no
+  model of its own for where the warmth and the rain fall. And it changes nothing that is drawn: the land is painted
+  from the run, and the water, the rivers, the atlases and the scenes read the run.
+author: machine:claude-code
+code: core/climatechance.ts
+kind: at-once
+inputs:
+  - { ref: field:earth/climate, note: "each keyframe's run: the warmest and coldest month, the aridity and the margin at each node, the surface's mean of the year, land and sea, and the run's own global mean" }
+  - { ref: field:earth/co2, note: "the CO₂ of each time with its band, a member a draw from it" }
+  - { ref: field:sun/luminosity, note: "the Sun's brightness at each time" }
+  - { ref: field:earth/temperature-energy-balance, note: "how many members the energy balance is run for, and the pressure its CO₂ is read at" }
+  - { ref: field:earth/snowball-co2, note: "the energy balance's parameters" }
+  - { ref: field:earth/surface-temperature, note: "the rocks' curve of the Earth's mean temperature, with its band" }
+  - { ref: field:earth/climate-late-quaternary, note: "its youngest keyframe: the climate measured, which the run of the present is held to" }
+  - { ref: field:earth/rock-record, note: "the collections: where each is, the span of its age, its lithologies with their adjectives, its environment and the classes the database gives it" }
+  - { ref: field:earth/biome, note: "the thresholds the classes follow from" }
+  - { prop: evidence, note: "the records of forests fossilized where they grew" }
+  - { ref: src:paleomap-plate-model, note: "where each collection's and each forest's plate stood at each keyframe" }
+outputs: [field:earth/climate-chance, field:earth/climate-beds]
+prior:
+  - reads: field:earth/co2
+    form: >-
+      The Earth's mean warmth is the global mean of the energy balance (model:earth/energy-balance) in balance on the
+      CO₂ of the keyframe, once for each member of the CO₂, with the mean distance of the balance from the rocks'
+      curve added, and the balance's own error about it. The mean distance is fitted to the curve, which is another's
+      reconstruction: as it is, the balance tells an era of the curve held out worse than the mean of the other eras
+      does, and brought to the curve's level, better. So the level is the curve's, and the rises and falls with the
+      CO₂ are the balance's.
+  - reads: field:sun/luminosity
+    form: The same energy balance, under the Sun of the keyframe.
+  - reads: field:earth/climate
+    form: >-
+      A member's climate at a node is the run's there, its warmest and coldest month moved by the member's mean warmth
+      less the run's own, times how the land of the node's belt of latitude answers to the mean across the runs, and
+      the log of its aridity likewise. About that, the run's error in the year's mean, in the season's swing and in
+      the log of the aridity, each a bell whose width is the root mean square of the run's error at the present. The
+      run is another's model, and decision 13 would have it observe: it is the prior's shape here because the world
+      has no model of its own for the pattern.
+observes:
+  - evidence: field:earth/surface-temperature
+    support: >-
+      The mean of the curve's values over a keyframe's span of ten million years: an observation of the Earth's mean
+      warmth at a moment taken anywhere in the span.
+    error: >-
+      The half-width of the curve's band, read as one standard deviation since its source does not say what it is,
+      with how far the curve moves within the span. The curve was drawn from beds of the same kinds as this model
+      reads, mapped by its authors, so it is not wholly apart from them.
+    effort: "A reconstruction, not a find: it has a value at every time."
+  - evidence: field:earth/rock-record
+    support: >-
+      A bed: the collections of one kind in a box of a tenth of a degree, in a keyframe's span, where their plate
+      stood at the keyframe. A collection is of each span its own overlaps, by the share of it that lies inside. A
+      bed counts at a node by a bell, narrower by the root of two than the one the run's errors go together by.
+    error: >-
+      A bed says what the ground was at some time in the span. Which of a pair's two kinds forms at a place follows
+      its climate by a link fitted over all time, and much besides: a basin, a coast, the life of the time. How much a
+      place's own share varies about the link is fitted to beds held out, and the climate is given the part of it
+      that the run's error, as measured at the present, could explain. If the run errs more in the deep past than at
+      the present, as it surely does, the beds are given too little.
+    effort: >-
+      Kinds are set against kinds, so that how much a place has been dug cancels: what is reckoned is the share of
+      one kind among the two found near, and nothing is made of a place where neither was found. It does not cancel
+      where one kind is not looked for: the database holds beds with fossils, and a salt seldom has any, so each
+      keyframe's level takes up how many times rarer one kind is than the other, and with it whether the whole
+      keyframe was wetter or warmer than its members.
+  - evidence: { prop: evidence, kind: occurrence }
+    support: >-
+      A forest fossilized where it grew (a record whose `evidence` is `in-situ-forest`), at its place and at the
+      keyframe nearest its time. It is read twice: as a bound on the warmest month and on the aridity at its place,
+      and of the nodes near by how far the run's errors go together; and, through the pattern, as what every value
+      of the Earth's mean warmth must make likely there.
+    error: >-
+      Trees grow where the warmest month is 10 °C or more and the land is no desert, which is Köppen's edge of the
+      polar climates and of the deserts, taken softly: by the season's swing and by what else is in doubt at the
+      place. One forest in twenty is taken to say nothing of the bound, standing along a river in dry country or
+      wrongly placed or dated. A forest says nothing of how warm it was beyond the bound, nor of its winters.
+    effort: >-
+      Fifteen records, written because the forests are famous: no list of where forests were looked for stands behind
+      them, and nothing is made of a place with none. Each is told with itself held out, and that is what is scored.
+  - evidence: field:earth/climate-late-quaternary
+    support: The climate measured at each land node of the run of the present, as the field's youngest keyframe has it.
+    error: >-
+      It is a climate model's months corrected to the climate observed in 1901 to 1930, read here from a byte to a
+      number. It conditions no place: it sets how far the run is taken to err, and over what distance, at every time.
+    effort: Measured everywhere on land north of 60°S.
+holdout:
+  held:
+    - a bed's own node, the others of its node left out
+    - its tile of ten degrees
+    - its block of forty degrees, a region
+    - every fourth keyframe with the two either side, an era of fifty million years, its beds told with nothing found and a level from the keyframes beyond
+    - for the Earth's mean warmth, an era of a hundred million years of the curve
+    - each fossil forest, told from all else
+    - each block of forty degrees of the present, its spread told from the other blocks
+  baseline: >-
+    The same beds by latitude and time alone: the share of the one kind among the two in the keyframe and those either
+    side, on a bell of ten degrees of latitude, north and south together, with the finds near averaged in as the model
+    averages them. For the Earth's mean warmth, the mean of the curve over the other eras.
+  rivals:
+    - is: field:earth/climate
+      read: the run's own class at a place taken as a point, with the chance it turns out to deserve and the rest shared among the other classes
+  scores: >-
+    coverage.json, under climateChance; and climate-chance/index.json. A kind of bed is scored at the keyframes where
+    it is read: those with beds enough of both its kinds.
+params:
+  belt_deg:
+    choice: >-
+      Ten degrees of latitude, both hemispheres together: wide enough that every run has land in every belt, narrow
+      enough to show how the answer grows towards the poles.
+  curve_band_sd:
+    choice: >-
+      The half-width of the band about the rocks' curve is read as one standard deviation: its source gives a range
+      and does not say what the range is.
+  era_myr:
+    choice: A hundred million years of the curve held out at a time, to score the energy balance on what it was not brought to.
+  balance_sd_min:
+    choice: >-
+      One degree: the least the balance's own error is taken to be. The build takes how far the balance lies from the
+      curve with an era held out, once brought to the curve's level by the other eras, and writes it in
+      climate-chance/index.json.
+  forest_slip:
+    choice: >-
+      One forest in twenty is taken to have stood where the climate was not one that bears trees: along a river in
+      dry country, or wrongly placed or dated. No work gives it.
+  wet_at:
+    choice: The log of an aridity of one, the edge of the dry climates, is where the wet and dry beds' level is counted from.
+  reef_at:
+    choice: A year's mean of 20 °C is where the reefs' level is counted from.
+  ice_at:
+    choice: A year's mean of 0 °C is where the tills' level is counted from.
+  wet_slope:
+    choice: >-
+      Where the fit starts. The build fits how fast the log of the odds of a wet bed among wet and dry ones moves with
+      the log of the aridity, to the kind of every such bed told from the members' climate at its place alone, and
+      writes it in climate-chance/index.json.
+  reef_slope:
+    choice: Where the fit starts; fitted likewise to the reefs among the beds of the sea, by the year's mean at the surface.
+  ice_slope:
+    choice: Where the fit starts; fitted likewise to the other beds of the land among them and the tills.
+  own:
+    choice: >-
+      Where the fit starts. For each kind the build fits how much a place's own log odds vary about the link, as a
+      variance, to beds told when their node's others and their tile's are held out, and writes it in
+      climate-chance/index.json.
+  pool:
+    choice: >-
+      Two keyframes either side share a keyframe's level, so that a keyframe with few beds of a kind borrows from its
+      neighbours in time. A choice: no work gives how fast the level changes.
+  level_min:
+    choice: >-
+      Five beds of the rarer kind, by weight, in a keyframe and those it shares a level with: with fewer the kind is
+      not read there. Before the forests of the Devonian there are no coals, and the database's only tills are of the
+      last few million years.
+  smoother_deg:
+    choice: Ten degrees of latitude, the width of the bell the smoother with no causes reads the beds by.
+  tile_deg:
+    choice: "Ten degrees, the tile a bed is held out with: about the reach of one bed."
+  block_deg:
+    choice: >-
+      Forty degrees, the block a bed is held out with, as a region whole: wider than the bell a bed counts by, so
+      that a bed at its middle is told by few beds from beyond its edge.
+  span_every:
+    choice: Every fourth keyframe is the middle of an era held out whole.
+  reach_km:
+    choice: >-
+      The distances the run's errors at two land nodes of the present are compared within. The build fits a bell to
+      how alike the errors are by distance, one for the year's mean and one for the aridity, and writes their widths
+      in climate-chance/index.json.
+  box_deg:
+    choice: >-
+      A tenth of a degree: collections of one kind this close together are one bed, since a quarry worked a hundred
+      times says no more of the climate than one worked once. No work gives it.
+  wet_lithologies:
+    choice: >-
+      The database's lithologies read as a wet bed: its coals of every rank, peat and coal balls. Tar, which it types
+      with them, is a seep and says nothing of rain.
+  wet_environments:
+    choice: The database's environment read as a wet bed, a mire or swamp.
+  dry_lithologies:
+    choice: The database's lithologies of the type it calls evaporite, read as a dry bed.
+  dry_adjectives:
+    choice: A lithology the database calls gypsiferous is read as a dry bed too.
+  dry_environments:
+    choice: >-
+      The database's environments of wind-blown sand, read as a dry bed. Loess is left out: it is blown from the
+      forelands of ice as well as from deserts.
+  reef_class:
+    choice: The database's class of environment read as a reef. It takes in mounds built by microbes and sponges, which need no warm water.
+  sea_class:
+    choice: The database's class read as a bed of the sea, which a reef is set against.
+  ice_class:
+    choice: The database's class read as a till.
+  land_class:
+    choice: The database's class read as a bed of the land, which a till is set against.
+uncertainty:
+  kind: ensemble
+  note: >-
+    A member of the world is four draws, the same at every place and time (core/climatechance.ts, drawOf): of the
+    Earth's mean warmth, in which a member keeps the place its CO₂ gave it; of the run's error in the year's mean; of
+    its error in the season's swing; and of its error in the aridity. The files keep the central climate and the
+    spreads, so any member can be drawn, and the chance of each class over all of them. The numbers fitted are taken
+    as fitted, with no doubt of their own; so is the pattern's answer to the mean; and the spread of the run's error
+    is the present's at every time.
+checks:
+  - { test: core/climatechance.test.ts, holds: "gives the run's own class a chance of one where nothing is spread, and chances that add to one where something is" }
+  - { test: core/climatechance.test.ts, holds: "moves the run's pattern more towards the poles than at the equator, by how its belt answers" }
+  - { test: core/climatechance.test.ts, holds: "keeps member 0 the central climate, and a member drawn warmer the warmer at every place" }
+  - { test: core/climatechance.test.ts, holds: "moves towards wet with coals and towards dry with salts, and leaves a place where they are found as expected" }
+  - { test: core/climatechance.test.ts, holds: "gives the climate only its part of what the beds say: none where the run could not err, all where nothing else moves them" }
+  - { test: core/climatechance.test.ts, holds: "takes a forest for a bound on the warmest month: the mean moves up and the spread narrows, the more the less likely trees were" }
+  - { test: tools/world/test/climatechance.test.ts, holds: "gives a climate with its spread at every node the run has one, the chances adding to one" }
+  - { test: tools/world/test/climatechance.test.ts, holds: "reads from the runs that the poles answer to the Earth's mean warmth more than the equator" }
+  - { test: tools/world/test/climatechance.test.ts, holds: "tells an era of the rocks' curve held out better than the mean of the other eras once brought to its level, and worse as it is" }
+  - { test: tools/world/test/climatechance.test.ts, holds: "tells wet and dry beds held out better than the smoother with no causes, and reefs no better" }
+  - { test: tools/world/test/climatechance.test.ts, holds: "says what it means: of the beds given a chance of being of a kind, about that share were" }
+  - { test: tools/world/test/climatechance.test.ts, holds: "orders the columns' units with salt and with coal, which it does not read, at least as well as the run does" }
+  - { test: tools/world/test/climatechance.test.ts, holds: "gives the fossil forests, each held out, a climate that bears trees more often than not, and more once read" }
+  - { test: tools/world/test/climatechance.test.ts, holds: "held to the present, has the measured climate in its band about nine times in ten, and gives the measured class more chance than the run's class as a point" }
+disagrees:
+  - with: life/hell-creek/ecosystem#formation
+    note: >-
+      Fossil leaves give the Hell Creek a mean of the year of 12 to 20 °C (Wilf et al. 2003, cited on this claim), and
+      its crocodilians and palms say its winters did not freeze. The run has the year's mean there at about 16 °C,
+      inside the leaves' range, and the coldest month below freezing. The model is colder than the run: the rocks'
+      curve has the Earth of that span cooler than the level the run was tuned to, and the pattern moves with it. Its
+      band for the year's mean takes in the lower part of the leaves' range, and it gives a coldest month above
+      freezing about one chance in twenty. The run's error is taken to be what it is at the present, and a run's
+      winters in the interiors of warm worlds are out by more than that. Each build says what it has there
+      (`npm run world -- climate 47.55 -106.86 66.5 Ma`).
+  - with: field:earth/surface-temperature
+    note: >-
+      The energy balance, which the Earth's mean warmth starts from, is some 5 °C colder than the curve on average.
+      That distance is added, so the warmth's level is the curve's and not the balance's: fitted to another's
+      reconstruction, which decision 13 of the plan warns against. With an era of the curve held out, the balance as
+      it is tells it worse than the mean of the other eras; each build gives the numbers (coverage.json,
+      climateChance.warmth).
+  - with: field:earth/strata
+    note: >-
+      The columns of rock, which the model does not read, have units with salt and units with coal at each keyframe.
+      The model orders them a little better than the run does, the salt on the drier ground. But about half of the
+      units with salt lie on ground whose central climate is not arid, by the model as by the run: either the run is
+      too wet where salt was laid down, as it is too wet at the present, or salt pans lay in climates Köppen would not
+      call dry. Each build counts them (coverage.json, climateChance.columns).
